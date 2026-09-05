@@ -1,0 +1,11 @@
+{
+  "name": "access-control-ctf",
+  "version": "1.0.0",
+  "private": true,
+  "dependencies": {
+    "ethers": "^6.15.0",
+    "express": "^5.1.0",
+    "cookie-parser": "^1.4.7",
+    "solc": "^0.8.30"
+  }
+}

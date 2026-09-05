@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Access Control Challenge</title>
+<style>
+body{font-family:Arial,sans-serif;background:#f4f6f8;color:#222;margin:0}
+header{text-align:center;padding:28px}
+main{max-width:900px;margin:auto}
+.card{background:#fff;border:1px solid #d5d9de;border-radius:12px;margin:18px 0;padding:20px;box-shadow:0 2px 8px #00000010}
+h1{margin:10px 0}.row{margin:13px 0}.label{font-weight:bold;display:block;margin-bottom:7px}
+code,pre{background:#eef1f4;border-radius:6px;padding:7px;word-break:break-all}
+pre{white-space:pre-wrap}
+.status{padding:14px;border-radius:8px;text-align:center;font-weight:bold}
+.hidden{background:#c83232;color:white}.solved{background:#278a46;color:white}
+button{padding:10px 16px;border:0;border-radius:7px;cursor:pointer}
+.warn{font-size:14px;color:#555}.mono{font-family:monospace}
+#timer{font-weight:bold}
+</style>
+</head>
+<body>
+<header><h1>Access Control Challenge</h1></header>
+<main>
+<section class="card">
+<h2>Welcome</h2>
+<p>Exploit the <b>access control</b> vulnerability to take ownership and retrieve the flag.</p>
+</section>
+
+<section class="card">
+<h2>Contract Details</h2>
+<div class="row"><span class="label">Contract Address:</span><code id="contract">loading...</code></div>
+<div class="row"><span class="label">RPC URL:</span><code id="rpc">loading...</code></div>
+<div class="row"><span class="label">Chain ID:</span><code>31337</code></div>
+</section>
+
+<section class="card">
+<h2>Your Player Account</h2>
+<div class="row"><span class="label">Your Private Key:</span><code id="key">loading...</code></div>
+<div class="row"><span class="label">Your Address:</span><code id="address">loading...</code></div>
+<div class="row"><span class="label">Gas Balance:</span><code id="balance">loading...</code></div>
+<p class="warn">This key belongs only to your current instance. Never use a real wallet key here.</p>
+</section>
+
+<section class="card">
+<h2>Instance</h2>
+<p>Time remaining: <span id="timer">10:00</span></p>
+<button onclick="resetInstance()">New Instance</button>
+</section>
+
+<section class="card">
+<h2>Flag Status</h2>
+<div id="status" class="status hidden">Flag hidden: You are not the owner yet.</div>
+<pre id="flag" style="display:none"></pre>
+</section>
+</main>
+<script>
+let expiry=0;
+async function load(){
+  const r=await fetch('/api/instance',{cache:'no-store'});
+  const x=await r.json();
+  document.getElementById('contract').textContent=x.contract;
+  document.getElementById('rpc').textContent=location.origin.replace(':54836',':8545')+'/';
+  document.getElementById('key').textContent=x.playerPrivateKey;
+  document.getElementById('address').textContent=x.playerAddress;
+  document.getElementById('balance').textContent=x.gasBalance+' ETH';
+  expiry=x.expiresAt;
+  const s=document.getElementById('status');
+  if(x.revealed){
+    s.className='status solved'; s.textContent='Challenge solved: flag revealed.';
+    document.getElementById('flag').style.display='block';
+    document.getElementById('flag').textContent=x.flag || 'Flag unavailable';
+  } else if(x.owner.toLowerCase()===x.playerAddress.toLowerCase()){
+    s.className='status solved'; s.textContent='You are the owner. Call solve() to reveal the flag.';
+  } else {
+    s.className='status hidden'; s.textContent='Flag hidden: You are not the owner yet.';
+  }
+}
+async function resetInstance(){
+  await fetch('/api/reset',{method:'POST'});
+  location.reload();
+}
+setInterval(()=>{
+  if(!expiry)return;
+  let sec=Math.max(0,Math.floor((expiry-Date.now())/1000));
+  document.getElementById('timer').textContent =
+    String(Math.floor(sec/60)).padStart(2,'0')+':'+String(sec%60).padStart(2,'0');
+  if(sec===0) location.reload();
+},1000);
+load();
+setInterval(load,3000);
+</script>
+</body>
+</html>
