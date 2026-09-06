@@ -1,0 +1,5 @@
+First Name: Alice
+Last Name: Johnson
+Nickname: Aj
+Date of Birth: 15/07/1990
+Favorite Number: 7

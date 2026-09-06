@@ -1,0 +1,92 @@
+services:
+
+  anvil:
+    image: ghcr.io/foundry-rs/foundry:stable
+
+    # Explicitly run Anvil instead of relying on the image's
+    # default shell entrypoint.
+    entrypoint:
+      - anvil
+
+    command:
+      - --host
+      - 0.0.0.0
+      - --port
+      - "8545"
+      - --chain-id
+      - "31337"
+      - --accounts
+      - "1"
+      - --balance
+      - "10000"
+      - --silent
+
+    restart: unless-stopped
+
+    expose:
+      - "8545"
+
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "cast",
+          "rpc",
+          "eth_chainId",
+          "--rpc-url",
+          "http://127.0.0.1:8545"
+        ]
+      interval: 2s
+      timeout: 3s
+      retries: 30
+      start_period: 3s
+
+    networks:
+      - ctfnet
+
+
+  access-control:
+    build:
+      context: ./app
+
+    restart: unless-stopped
+
+    depends_on:
+      anvil:
+        condition: service_healthy
+
+    environment:
+
+      CHAIN_URL: "http://anvil:8545"
+
+      ADMIN_PRIVATE_KEY: "0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80"
+
+      CTF_FLAG: "KiTS_CS_CTF{4cc3ss_c0ntr0l_1s_n0t_s3cur3}"
+
+      UI_PORT: "54836"
+
+      RPC_PORT: "8545"
+
+    ports:
+      - "54836:54836"
+      - "8545:8545"
+
+    networks:
+      - ctfnet
+
+    security_opt:
+      - no-new-privileges:true
+
+    cap_drop:
+      - ALL
+
+    read_only: true
+
+    tmpfs:
+      - /tmp
+
+
+networks:
+
+  ctfnet:
+    driver: bridge
