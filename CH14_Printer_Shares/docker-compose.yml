@@ -1,0 +1,13 @@
+services:
+  printer-shares-3:
+    build: .
+    container_name: kits-printer-shares-3
+    restart: unless-stopped
+    ports:
+      - "51283:445"
+    networks:
+      - ctfnet
+
+networks:
+  ctfnet:
+    driver: bridge

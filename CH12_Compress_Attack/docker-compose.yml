@@ -1,0 +1,6 @@
+services:
+  compress-and-attack:
+    build: .
+    restart: unless-stopped
+    stdin_open: true
+    tty: true
