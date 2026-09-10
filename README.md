@@ -1,3 +1,5 @@
+https://upskill.crossbowsec.com/course/crossbow-campus-recruitment-drive-grc-qualifiers
+
 # 🏴‍☠️ KiST CS CTF
 
 <p align="center">
